@@ -16,8 +16,8 @@ export const useLogin = () => {
   const methods = useForm<LoginFormProps>({
     resolver: zodResolver(LoginScshema),
     defaultValues: {
-      email: "super-admin@test.com",
-      password: "12345678",
+      email: "",
+      password: "",
     },
     mode: "onChange",
   });
