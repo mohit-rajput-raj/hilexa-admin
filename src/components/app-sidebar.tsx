@@ -107,7 +107,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const { isMobile, setOpenMobile } = useSidebar();
 
-
+  //useEffect is used here to close the sidebar when the user navigates to a different page
   React.useEffect(() => {
 
     if (isMobile) {
