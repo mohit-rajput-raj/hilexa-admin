@@ -1,7 +1,7 @@
 import React from 'react'
 // import { Spinner } from '../spinner'
 import { cn } from '@/lib/utils'
-import { Spinner } from '../spinner'
+import { Spinner } from '@/components/ui/spinner'
 
 type LoaderProps = {
   loading: boolean
@@ -16,10 +16,10 @@ export const Loader = ({
   children,
   className,
 }: LoaderProps) => {
-  
+
   return loading ? (
     <div className={cn(className || 'w-full py-5 flex justify-center')}>
-      <Spinner/>
+      <Spinner />
     </div>
   ) : (
     children
