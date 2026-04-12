@@ -1,10 +1,13 @@
 import React from 'react'
+import AdminSettingsPage from './_components/main-settings_page'
 
 type Props = {}
 
 const page = (props: Props) => {
   return (
-    <div>page</div>
+    <div>
+      <AdminSettingsPage />
+    </div>
   )
 }
 

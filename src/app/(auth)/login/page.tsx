@@ -62,7 +62,7 @@ export default function LoginPage() {
 
             <div className="hidden bg-muted lg:flex items-center justify-center w-full h-full">
                 <img
-                    src="/dash.png"
+                    src="/admin-dash.png"
                     alt="Acme Inc. Branding"
                     className={`
             h-32 md:h-100 lg:h-108 object-contain

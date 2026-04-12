@@ -17,6 +17,7 @@ import {
 import { LayoutDashboardIcon, ListIcon, ChartBarIcon, FolderIcon, UsersIcon, CameraIcon, FileTextIcon, Settings2Icon, CircleHelpIcon, SearchIcon, DatabaseIcon, FileChartColumnIcon, FileIcon, CommandIcon, Home, CalendarHeartIcon, DollarSignIcon, Tag, Star } from "lucide-react"
 import LOGO from "./logo/logo"
 import { usePathname, useRouter } from "next/navigation"
+import { InstallPrompt } from "./pwa"
 
 const data = {
   user: {
@@ -116,7 +117,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   }, [pathname, isMobile, setOpenMobile]);
   return (
     <Sidebar collapsible="offcanvas" {...props}>
-      <SidebarHeader className="bg-background">
+      <SidebarHeader >
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
@@ -127,9 +128,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent className="bg-background">
+      <SidebarContent className="">
         <NavMain items={data.navMain} />
       </SidebarContent>
+      <InstallPrompt/>
       <SidebarFooter>
         <NavUser />
       </SidebarFooter>

@@ -11,6 +11,7 @@ import {
 import { cn } from "@/lib/utils"
 import { CirclePlusIcon, MailIcon } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
+import { RouterPush } from "./RouterPush"
 
 export function NavMain({
   items,
@@ -25,7 +26,7 @@ export function NavMain({
   const router = useRouter()
   const handelNavigation = (url: string) => {
     if (pathname === url) return
-    router.push(url)
+    RouterPush(router, url)
   }
   return (
     <SidebarGroup>

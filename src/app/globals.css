@@ -227,3 +227,10 @@ html {
   0%, 100% { transform: translateY(0); }
   50%      { transform: translateY(-12px); }
 }
+
+
+
+/* Optional custom styling for the tabs container */
+.tabs-content-animation {
+  transition: all 0.2s ease-in-out;
+}

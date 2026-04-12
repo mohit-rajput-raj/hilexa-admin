@@ -1,7 +1,7 @@
-import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { ModeToggle } from "./ui/toggle-theme"
+import { InstallPrompt } from "./pwa"
 
 export function SiteHeader() {
   return (
@@ -14,6 +14,7 @@ export function SiteHeader() {
             className="mx-2 data-[orientation=vertical]:h-8"
           />
         </div>
+        
 
         <ModeToggle />
       </div>
