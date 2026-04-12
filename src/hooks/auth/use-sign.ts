@@ -29,7 +29,6 @@ export const useLogin = () => {
       const result = await userLogin(data);
       if (result.success) {
         toast.success(result.message || "Login successful!");
-        console.log(result);
 
         router.push("/dashboard");
       } else {

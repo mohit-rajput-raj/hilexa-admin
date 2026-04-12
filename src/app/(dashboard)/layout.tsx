@@ -9,8 +9,9 @@ import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import LogoLoader from "@/components/loaders/logoloader"
 import { useVariants } from "@/providers/main-provider/variants-provider"
-
-export default function Layout() {
+import { ErrorBoundary } from 'react-error-boundary'
+import { CompactFooter } from "@/components/footer/compactfooter"
+export default function Layout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [ok, setOk] = useState(false);
   const { variant } = useVariants()
@@ -33,15 +34,17 @@ export default function Layout() {
       }
     >
       <AppSidebar variant={variant} className="border-border bg-background" />
-      <SidebarInset>
-        <SiteHeader />
-        <div className="flex flex-1 flex-col">
+      <SidebarInset className="bg-gray-50 dark:bg-zinc-900">
+        <ErrorBoundary fallback={<div>Something went wrong</div>}>
+          <SiteHeader />
+        </ErrorBoundary>
+        <div className="flex flex-1 flex-col px-2">
           <div className="@container/main flex flex-1 flex-col gap-2">
-            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-              {/* <SectionCards /> */}
-
+            <div className="flex flex-col gap-4 p-2 md:gap-6 md:p-2  rounded-xl min-h-screen">
+              {children}
 
             </div>
+            <CompactFooter />
           </div>
         </div>
       </SidebarInset>

@@ -97,7 +97,6 @@ export const useAuthStore = create<AuthStates>()((set) => ({
         set({ currUser: res.data.data.user });
         const token = res.data.accessToken;
         localStorage.setItem("accessToken", token);
-        console.log(res);
 
         // console.log("asd");
         // console.log(res);
@@ -135,7 +134,6 @@ export const useAuthStore = create<AuthStates>()((set) => ({
 
   userSignup: async (data: Login_signup_Data) => {
     set({ isSiging: true });
-    console.log(data);
 
     try {
       const res = await axiosApi.post("/auth/signup", data);

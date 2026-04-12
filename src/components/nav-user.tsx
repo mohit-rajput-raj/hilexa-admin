@@ -44,7 +44,6 @@ export function NavUser() {
   const { isMobile } = useSidebar()
   const { data: vendor, isLoading, refetch, isRefetching } = useCurrentUser();
   const [mounted, setMounted] = useState(false)
-  console.log(vendor);
 
   const queryClient = useQueryClient();
   const { setVariant, variant } = useVariants()
