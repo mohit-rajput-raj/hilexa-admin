@@ -1,4 +1,4 @@
-"use client";
+'use client'
 
 import * as React from "react";
 import {
@@ -25,6 +25,8 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Property } from "../page";
+import { RouterPush } from "@/components/RouterPush";
+import { useRouter } from "next/navigation";
 
 // Helper for date
 const formatDate = (iso?: string) => {
@@ -75,13 +77,12 @@ export const columns: ColumnDef<Property>[] = [
     cell: ({ row }) => {
       const status = row.getValue("status") as string;
       return (
-        <Badge 
+        <Badge
           variant="outline"
-          className={`capitalize text-[10px] font-bold ${
-            status === "approved" 
-              ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" 
-              : "bg-orange-500/10 text-orange-600 border-orange-500/20"
-          }`}
+          className={`capitalize text-[10px] font-bold ${status === "approved"
+            ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+            : "bg-orange-500/10 text-orange-600 border-orange-500/20"
+            }`}
         >
           {status}
         </Badge>
@@ -109,11 +110,16 @@ export const columns: ColumnDef<Property>[] = [
   {
     id: "actions",
     header: "Manage",
-    cell: ({ row }) => (
-      <Button variant="ghost" size="sm" className="h-8 text-[11px] font-bold">
-        View Details
-      </Button>
-    ),
+    cell: ({ row }) => {
+      const router = useRouter();
+      return (
+        <Button variant="ghost" size="sm" className="h-8 text-[11px] font-bold" onClick={() => {
+          RouterPush(router, `/properties/${row.original._id}`)
+        }}>
+          View Details
+        </Button>
+      )
+    },
   },
 ];
 
@@ -191,8 +197,8 @@ export function PropertiesDataTable({ properties }: { properties: Property[] }) 
       <div className="p-4 border-t border-border bg-muted/10 flex items-center justify-between text-[11px] font-medium text-muted-foreground">
         <div>Showing {table.getRowModel().rows.length} properties</div>
         <div className="flex gap-2">
-           <Button variant="outline" size="sm" className="h-7 px-2" disabled={!table.getCanPreviousPage()} onClick={() => table.previousPage()}>Prev</Button>
-           <Button variant="outline" size="sm" className="h-7 px-2" disabled={!table.getCanNextPage()} onClick={() => table.nextPage()}>Next</Button>
+          <Button variant="outline" size="sm" className="h-7 px-2" disabled={!table.getCanPreviousPage()} onClick={() => table.previousPage()}>Prev</Button>
+          <Button variant="outline" size="sm" className="h-7 px-2" disabled={!table.getCanNextPage()} onClick={() => table.nextPage()}>Next</Button>
         </div>
       </div>
     </div>

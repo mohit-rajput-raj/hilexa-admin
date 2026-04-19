@@ -77,7 +77,7 @@ export function LoginForm({
                     <Field>
                         <Button type="submit" disabled={loading}>{loading ? "Loading..." : "Login"}</Button>
                     </Field>
-                    <FieldSeparator>Or</FieldSeparator>
+                    {/* <FieldSeparator>Or</FieldSeparator>
                     <Field className="grid gap-4 sm:grid-cols-2">
                         <Button variant="outline" type="button">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -97,7 +97,7 @@ export function LoginForm({
                             </svg>
                             Continue with Google
                         </Button>
-                    </Field>
+                    </Field> */}
 
 
                 </FieldGroup>

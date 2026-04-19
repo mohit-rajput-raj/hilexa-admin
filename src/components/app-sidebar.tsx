@@ -14,7 +14,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { LayoutDashboardIcon, ListIcon, ChartBarIcon, FolderIcon, UsersIcon, CameraIcon, FileTextIcon, Settings2Icon, CircleHelpIcon, SearchIcon, DatabaseIcon, FileChartColumnIcon, FileIcon, CommandIcon, Home, CalendarHeartIcon, DollarSignIcon, Tag, Star } from "lucide-react"
+import { LayoutDashboardIcon, ListIcon, ChartBarIcon, FolderIcon, UsersIcon, CameraIcon, FileTextIcon, Settings2Icon, CircleHelpIcon, SearchIcon, DatabaseIcon, FileChartColumnIcon, FileIcon, CommandIcon, Home, CalendarHeartIcon, DollarSignIcon, Tag, Star, IndianRupee } from "lucide-react"
 import LOGO from "./logo/logo"
 import { usePathname, useRouter } from "next/navigation"
 import { InstallPrompt } from "./pwa"
@@ -62,7 +62,7 @@ const data = {
       title: "Payments",
       url: "/payments",
       icon: (
-        <DollarSignIcon
+        <IndianRupee
         />
       ),
     },
@@ -131,7 +131,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent className="">
         <NavMain items={data.navMain} />
       </SidebarContent>
-      <InstallPrompt/>
+      {/* <InstallPrompt/> */}
       <SidebarFooter>
         <NavUser />
       </SidebarFooter>
