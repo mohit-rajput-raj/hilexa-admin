@@ -1,8 +1,10 @@
 'use client'
-import React from 'react'
+import React, { Suspense } from 'react'
 import { useProperty } from './_calls/queryies'
 import { PropertiesDataTable } from './_comp/propertytable';
 import { PageSkeleton } from '@/components/loaders/loader/skeleton';
+import { ErrorBoundary } from 'react-error-boundary';
+import { MessageModal } from '@/components/messagemodal';
 
 type Props = {}
 export interface Property {
@@ -33,9 +35,14 @@ const page = (props: Props) => {
     return <PageSkeleton/>
   }
   return (
+    <ErrorBoundary fallback={<MessageModal title="Error" description="Something went wrong" />}>
+            <Suspense fallback={<PageSkeleton />}>
+            
     <div>
       <PropertiesDataTable properties={data?.data?.data?.properties || []}/>
     </div>
+    </Suspense>
+    </ErrorBoundary>
   )
 }
 
