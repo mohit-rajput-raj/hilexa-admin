@@ -3,18 +3,15 @@ import { useQuery } from "@tanstack/react-query";
 import { adminUsers, getDestination, singleUser } from "./users.service";
 import { usePanelRef } from "react-resizable-panels";
 
-export const useAllUsers = () => {
-    const params = usePanelRef()
-    
-
+export const useAllUsers = (params?: any) => {
   return useQuery({
-    queryKey: ["admin_users"],
+    queryKey: ["admin_users", params],
     queryFn: () => adminUsers(params),
     staleTime: 20000,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: true,
-    retry: false, // optional
+    retry: false,
   });
 };
 export const useUser = (id: string) => {
