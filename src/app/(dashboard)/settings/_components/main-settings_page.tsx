@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,10 +9,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import * as z from "zod";
+import { useActiveTax, useSetTax } from "../_calls/queryes";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 export const TaxSchema = z.object({
-  commissionRate: z.coerce.number().min(0).max(100),
-  taxId: z.string().min(5, "Tax ID must be at least 5 characters"),
+  taxPercentage: z.coerce.number().min(0, "Rate cannot be negative").max(100, "Rate cannot exceed 100%"),
 });
 
 export const ProfileSchema = z.object({
@@ -31,11 +33,20 @@ export const PasswordSchema = z.object({
 });
 
 export default function AdminSettingsPage() {
+  const { data: taxData, isLoading: isTaxLoading } = useActiveTax();
+  const setTaxMutation = useSetTax();
+
   // 1. Tax Form
-  const taxForm = useForm({
-    resolver: zodResolver(TaxSchema),
-    defaultValues: { commissionRate: 0, taxId: "" },
+  const taxForm = useForm<z.infer<typeof TaxSchema>>({
+    resolver: zodResolver(TaxSchema) as any,
+    defaultValues: { taxPercentage: 0 },
   });
+
+  useEffect(() => {
+    if (taxData?.data?.data?.taxPercentage !== undefined) {
+      taxForm.reset({ taxPercentage: taxData.data.data.taxPercentage });
+    }
+  }, [taxData, taxForm]);
 
   // 2. Profile Form
   const profileForm = useForm({
@@ -49,68 +60,79 @@ export default function AdminSettingsPage() {
     defaultValues: { currentPassword: "", newPassword: "", confirmPassword: "" },
   });
 
-  const onSubmit = (data: any) => console.log("Form Submitted:");
+  const onTaxSubmit = async (values: z.infer<typeof TaxSchema>) => {
+    try {
+      await setTaxMutation.mutateAsync(values.taxPercentage);
+      toast.success("Tax percentage updated successfully");
+    } catch {
+      toast.error("Failed to update tax configuration");
+    }
+  };
+
+  const onSubmitPlaceholders = (data: any) => {
+    toast.success("Settings updated (Demo)");
+  };
 
   return (
     <div className="max-w-full mx-auto p-3">
-      <h1 className="text-3xl font-bold mb-6">Admin Settings</h1>
+      <h1 className="text-3xl font-bold mb-6 tracking-tight text-foreground">Admin Settings</h1>
 
       <Tabs defaultValue="tax" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="tax">Tax Commission</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 max-w-[400px] mb-6">
+          <TabsTrigger value="tax">Tax Configurations</TabsTrigger>
           <TabsTrigger value="profile">Admin Profile</TabsTrigger>
           <TabsTrigger value="password">Security</TabsTrigger>
         </TabsList>
 
-        {/* --- Tax Commission Tab --- */}
+        {/* --- Tax Configurations Tab --- */}
         <TabsContent value="tax">
-          <Card>
+          <Card className="border-border bg-card/50 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle>Tax Commission Patching</CardTitle>
-              <CardDescription>Adjust global commission rates and tax identifiers.</CardDescription>
+              <CardTitle>Tax Commission Settings</CardTitle>
+              <CardDescription>Adjust the global tax percentage configuration applied to all bookings.</CardDescription>
             </CardHeader>
             <CardContent>
-              <Form {...taxForm}>
-                <form onSubmit={taxForm.handleSubmit(onSubmit)} className="space-y-4">
-                  <FormField
-                    control={taxForm.control}
-                    name="commissionRate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Commission Rate (%)</FormLabel>
-                        <FormControl><Input type="number" /></FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={taxForm.control}
-                    name="taxId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Tax ID / VAT Number</FormLabel>
-                        <FormControl><Input placeholder="TX-99812" {...field} /></FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button type="submit">Patch Commission</Button>
-                </form>
-              </Form>
+              {isTaxLoading ? (
+                <div className="flex items-center justify-center py-6">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </div>
+              ) : (
+                <Form {...taxForm}>
+                  <form onSubmit={taxForm.handleSubmit(onTaxSubmit)} className="space-y-4 max-w-[400px]">
+                    <FormField
+                      control={taxForm.control}
+                      name="taxPercentage"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Tax Rate Percentage (%)</FormLabel>
+                          <FormControl>
+                            <Input type="number" step="any" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button type="submit" disabled={setTaxMutation.isPending}>
+                      {setTaxMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Save Tax Settings
+                    </Button>
+                  </form>
+                </Form>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
 
         {/* --- Profile Tab --- */}
         <TabsContent value="profile">
-          <Card>
+          <Card className="border-border bg-card/50 backdrop-blur-sm">
             <CardHeader>
               <CardTitle>Admin Profile</CardTitle>
               <CardDescription>Update your public information.</CardDescription>
             </CardHeader>
             <CardContent>
               <Form {...profileForm}>
-                <form onSubmit={profileForm.handleSubmit(onSubmit)} className="space-y-4">
+                <form onSubmit={profileForm.handleSubmit(onSubmitPlaceholders)} className="space-y-4 max-w-[400px]">
                   <FormField
                     control={profileForm.control}
                     name="name"
@@ -142,14 +164,14 @@ export default function AdminSettingsPage() {
 
         {/* --- Password Tab --- */}
         <TabsContent value="password">
-          <Card>
+          <Card className="border-border bg-card/50 backdrop-blur-sm">
             <CardHeader>
               <CardTitle>Change Password</CardTitle>
               <CardDescription>Ensure your account is using a long, random password.</CardDescription>
             </CardHeader>
             <CardContent>
               <Form {...passwordForm}>
-                <form onSubmit={passwordForm.handleSubmit(onSubmit)} className="space-y-4">
+                <form onSubmit={passwordForm.handleSubmit(onSubmitPlaceholders)} className="space-y-4 max-w-[400px]">
                   <FormField
                     control={passwordForm.control}
                     name="currentPassword"

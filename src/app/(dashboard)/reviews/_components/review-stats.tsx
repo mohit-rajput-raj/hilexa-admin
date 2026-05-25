@@ -1,55 +1,49 @@
 "use client";
 
 import React from "react";
-import { 
-  Ticket, 
-  LifeBuoy, 
-  CheckCircle2, 
-  Archive, 
-  History
-} from "lucide-react";
+import { Star, MessageSquareCode, MessageSquareOff, AlertOctagon, History } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
-export interface TicketStatsData {
-  totalTickets: number;
-  activeTickets: number;
-  resolvedTickets: number;
-  closedTickets: number;
+interface ReviewStatsData {
+  totalReviews: number;
+  avgRating: number;
+  lowRatings: number;
+  noReply: number;
 }
 
-export function TicketStatsGrid({ stats }: { stats: TicketStatsData }) {
+export function ReviewStatsGrid({ stats }: { stats: ReviewStatsData }) {
   const items = [
     {
-      title: "Total Tickets",
-      value: stats.totalTickets,
-      description: "All time requests",
-      icon: Ticket,
+      title: "Total Reviews",
+      value: stats?.totalReviews || 0,
+      description: "Customer feedback count",
+      icon: MessageSquareCode,
     },
     {
-      title: "Active Tickets",
-      value: stats.activeTickets,
-      description: "Needs attention",
-      icon: LifeBuoy,
+      title: "Average Rating",
+      value: `${stats?.avgRating || 0} / 5`,
+      description: "Satisfaction level",
+      icon: Star,
     },
     {
-      title: "Resolved",
-      value: stats.resolvedTickets,
-      description: "Fixed & Waiting",
-      icon: CheckCircle2,
+      title: "Critical Reviews",
+      value: stats?.lowRatings || 0,
+      description: "1 and 2 star feedback",
+      icon: AlertOctagon,
     },
     {
-      title: "Closed",
-      value: stats.closedTickets,
-      description: "Archived issues",
-      icon: Archive,
+      title: "Awaiting Reply",
+      value: stats?.noReply || 0,
+      description: "Needs vendor response",
+      icon: MessageSquareOff,
     },
   ];
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {items.map((item, index) => (
-        <Card 
-          key={index} 
+        <Card
+          key={index}
           className="border border-border bg-card/60 transition-colors hover:bg-card"
         >
           <CardContent className="p-5">

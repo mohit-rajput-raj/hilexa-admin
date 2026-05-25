@@ -1,22 +1,16 @@
-
 "use client";
 import { useQuery } from "@tanstack/react-query";
-import { usePanelRef } from "react-resizable-panels";
 import { getBookingById, getBookings, getBookingsStats } from "./bookings.service";
-// import { property } from "./users.service";
 
-export const useBookings = () => {
-    
-    
-
+export const useBookings = (params?: any) => {
   return useQuery({
-    queryKey: ["bookings"],
-    queryFn: () => getBookings(),
+    queryKey: ["bookings", params],
+    queryFn: () => getBookings(params),
     staleTime: 20000,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: true,
-    retry: false, // optional
+    retry: false,
   });
 };
 export const useBookingStats = () => {
