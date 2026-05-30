@@ -34,15 +34,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       }
     >
       <AppSidebar variant={variant} className="border-border bg-background" />
-      <SidebarInset className="bg-gray-50 dark:bg-zinc-900">
+      <SidebarInset className="bg-gray-50 dark:bg-zinc-900 overflow-x-hidden">
         <ErrorBoundary fallback={<div>Something went wrong</div>}>
           <SiteHeader />
         </ErrorBoundary>
-        <div className="flex flex-1 flex-col px-2">
+        <div className="flex flex-1 flex-col overflow-x-hidden">
           <div className="@container/main flex flex-1 flex-col gap-2">
-            <div className="flex flex-col gap-4 p-2 md:gap-6 md:p-2  rounded-xl min-h-screen">
+            <div className="flex flex-col gap-4 py-2 px-1 sm:px-3 md:gap-6 md:py-6 md:px-6 rounded-xl min-h-screen">
               {children}
-
             </div>
             <CompactFooter />
           </div>
