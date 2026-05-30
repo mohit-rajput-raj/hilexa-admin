@@ -91,6 +91,14 @@ const data = {
       ),
     },
     {
+      title: "Requests",
+      url: "/Requests",
+      icon: (
+        <ListIcon
+        />
+      ),
+    },
+    {
       title: "Settings",
       url: "/settings",
       icon: (
