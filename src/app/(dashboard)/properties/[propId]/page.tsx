@@ -95,7 +95,9 @@ const PropertyDetail = () => {
                             <div className="p-2 bg-card rounded-lg border border-border"><CreditCard size={16} /></div>
                             <div>
                               <p className="text-xs font-bold truncate max-w-[140px]">{doc.docName || "Document"}</p>
-                              <a href={doc.docUrl} target="_blank" className="text-[10px] text-primary hover:underline font-bold">View File</a>
+                              <ImagePreview src={doc.docUrl}>
+                                <button className="text-[10px] text-primary hover:underline font-bold text-left cursor-zoom-in">View File</button>
+                              </ImagePreview>
                             </div>
                           </div>
                           {doc.isVerified ? <CheckCircle2 size={14} className="text-emerald-500" /> : <ShieldAlert size={14} className="text-amber-500" />}
@@ -147,9 +149,11 @@ const PropertyDetail = () => {
                       )}
                       {bankDetails.proof?.url && (
                         <div className="col-span-2">
-                          <a href={bankDetails.proof.url} target="_blank" className="inline-flex items-center gap-2 py-2 px-3 border border-dashed border-border rounded-xl text-[10px] font-bold hover:bg-primary/5 transition-all">
-                            <ExternalLink size={12} /> View Bank Proof
-                          </a>
+                          <ImagePreview src={bankDetails.proof.url}>
+                            <button className="inline-flex items-center gap-2 py-2 px-3 border border-dashed border-border rounded-xl text-[10px] font-bold hover:bg-primary/5 transition-all cursor-zoom-in">
+                              <ExternalLink size={12} /> View Bank Proof
+                            </button>
+                          </ImagePreview>
                         </div>
                       )}
                     </div>
@@ -175,6 +179,9 @@ const PropertyDetail = () => {
                         <InfoField label="City" value={propertyDetails.city} />
                         <InfoField label="Address" value={propertyDetails.address} />
                         {propertyDetails.rank && <InfoField label="Rank" value={propertyDetails.rank} />}
+                        {propertyDetails.location?.coordinates && (
+                          <InfoField label="Coordinates" value={`${propertyDetails.location.coordinates[1]}, ${propertyDetails.location.coordinates[0]}`} mono />
+                        )}
                         {propertyDetails.verificationStatus && (
                           <div>
                             <p className="text-[10px] font-bold uppercase text-muted-foreground">Verification</p>
@@ -222,6 +229,29 @@ const PropertyDetail = () => {
                           <div className="flex flex-wrap gap-1.5">
                             {propertyDetails.features.map((f: string, i: number) => (
                               <span key={i} className="text-[10px] font-bold bg-muted px-2 py-1 rounded-lg border border-border">{f}</span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {propertyDetails.documents?.length > 0 && (
+                        <div className="mt-4">
+                          <p className="text-[10px] font-bold uppercase text-muted-foreground mb-2 flex items-center gap-1.5">
+                            <FileCheck size={12} className="text-primary" /> Property Documents ({propertyDetails.documents.length})
+                          </p>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            {propertyDetails.documents.map((doc: any, idx: number) => (
+                              <div key={doc.id || doc._id || idx} className="p-3 rounded-xl bg-muted/30 border border-border flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                  <div className="p-2 bg-card rounded-lg border border-border"><CreditCard size={16} /></div>
+                                  <div>
+                                    <p className="text-xs font-bold truncate max-w-[140px]">{doc.docName || "Document"}</p>
+                                    <ImagePreview src={doc.docUrl}>
+                                      <button className="text-[10px] text-primary hover:underline font-bold text-left cursor-zoom-in">View File</button>
+                                    </ImagePreview>
+                                  </div>
+                                </div>
+                                {doc.isVerified ? <CheckCircle2 size={14} className="text-emerald-500" /> : <ShieldAlert size={14} className="text-amber-500" />}
+                              </div>
                             ))}
                           </div>
                         </div>
@@ -278,6 +308,8 @@ const PropertyDetail = () => {
                     <div className="flex justify-between"><span className="text-muted-foreground">Email</span><span className="font-medium truncate ml-2">{businessDetails?.businessEmail || "N/A"}</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">Phone</span><span className="font-medium">{businessDetails?.businessPhone || "N/A"}</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">City</span><span className="font-medium">{businessDetails?.city || "N/A"}</span></div>
+                    {businessDetails?.state && <div className="flex justify-between"><span className="text-muted-foreground">State</span><span className="font-medium">{businessDetails.state}</span></div>}
+                    {businessDetails?.country && <div className="flex justify-between"><span className="text-muted-foreground">Country</span><span className="font-medium">{businessDetails.country}</span></div>}
                   </div>
                 </div>
 
@@ -440,33 +472,45 @@ function FinalActionCard({ vendor, id }: { vendor: any; id: string }) {
         <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center"><ShieldAlert size={18} className="text-amber-600" /></div>
         <h3 className="text-sm font-bold uppercase tracking-tight">Final Review</h3>
       </div>
-      {vendor?.rejectedSteps?.length > 0 && (
-        <p className="text-xs text-red-500 font-medium">{vendor.rejectedSteps.length} step(s) have issues. Rejecting will notify the vendor.</p>
+      {vendor?.status === 'approved' ? (
+        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3.5 flex items-center gap-3">
+          <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
+          <div>
+            <p className="text-xs font-bold text-emerald-800">Property Approved</p>
+            <p className="text-[10px] text-emerald-600">This property listing has been fully approved and is live.</p>
+          </div>
+        </div>
+      ) : (
+        <>
+          {vendor?.rejectedSteps?.length > 0 && (
+            <p className="text-xs text-red-500 font-medium">{vendor.rejectedSteps.length} step(s) have issues. Rejecting will notify the vendor.</p>
+          )}
+          <div className="grid grid-cols-2 gap-3">
+            <WarningDialog
+              open={actionType === 'reject'} onOpenChange={(o) => !o && setActionType(null)} loading={isMutating}
+              title="Reject Vendor?" description="The vendor will be notified and must re-submit flagged steps." func={handleReject}
+              trigger={
+                <button onClick={() => setActionType('reject')} disabled={isMutating} className="flex items-center gap-2 p-3 rounded-xl border border-red-100 bg-red-50/50 hover:bg-red-50 text-left transition-all active:scale-95 disabled:opacity-50">
+                  <ShieldAlert size={16} className="text-red-600" />
+                  <p className="text-[10px] font-black text-red-600 uppercase">Reject</p>
+                </button>
+              }
+            />
+            {vendor?.status !== 'approved' && (
+              <WarningDialog
+                open={actionType === 'approve'} onOpenChange={(o) => !o && setActionType(null)} loading={isMutating}
+                title="Approve Vendor?" description="All sections will be verified and listing goes live." func={handleApprove}
+                trigger={
+                  <button onClick={() => setActionType('approve')} disabled={isMutating} className="flex items-center gap-2 p-3 rounded-xl bg-emerald-600 text-white shadow-md active:scale-95 transition-all text-left disabled:opacity-50">
+                    <CheckCircle2 size={16} />
+                    <p className="text-[10px] font-black uppercase">Approve</p>
+                  </button>
+                }
+              />
+            )}
+          </div>
+        </>
       )}
-      <div className="grid grid-cols-2 gap-3">
-        <WarningDialog
-          open={actionType === 'reject'} onOpenChange={(o) => !o && setActionType(null)} loading={isMutating}
-          title="Reject Vendor?" description="The vendor will be notified and must re-submit flagged steps." func={handleReject}
-          trigger={
-            <button onClick={() => setActionType('reject')} disabled={isMutating} className="flex items-center gap-2 p-3 rounded-xl border border-red-100 bg-red-50/50 hover:bg-red-50 text-left transition-all active:scale-95 disabled:opacity-50">
-              <ShieldAlert size={16} className="text-red-600" />
-              <p className="text-[10px] font-black text-red-600 uppercase">Reject</p>
-            </button>
-          }
-        />
-        {vendor?.status !== 'approved' && (
-          <WarningDialog
-            open={actionType === 'approve'} onOpenChange={(o) => !o && setActionType(null)} loading={isMutating}
-            title="Approve Vendor?" description="All sections will be verified and listing goes live." func={handleApprove}
-            trigger={
-              <button onClick={() => setActionType('approve')} disabled={isMutating} className="flex items-center gap-2 p-3 rounded-xl bg-emerald-600 text-white shadow-md active:scale-95 transition-all text-left disabled:opacity-50">
-                <CheckCircle2 size={16} />
-                <p className="text-[10px] font-black uppercase">Approve</p>
-              </button>
-            }
-          />
-        )}
-      </div>
     </div>
   );
 }

@@ -18,7 +18,6 @@ import {
   ChevronRight,
   Star,
   MessageSquare,
-  Flag,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -41,12 +40,12 @@ import {
 } from "@/components/ui/select";
 
 export interface Review {
-  _id: string;
+  reviewId: string;
+  _id?: string;
   userName: string;
-  serviceType: string;
-  serviceName: string;
+  companyType: string;
+  companyName: string;
   vendorName: string;
-  city: string;
   rating: number;
   comment: string;
   hasReply: boolean;
@@ -67,7 +66,7 @@ export const columns: ColumnDef<Review>[] = [
   {
     id: "review",
     header: "Reviewer & Comments",
-    accessorFn: (row) => `${row.userName} ${row.comment} ${row.serviceName}`,
+    accessorFn: (row) => `${row.userName} ${row.comment} ${row.companyName}`,
     cell: ({ row }) => {
       const r = row.original;
       return (
@@ -110,17 +109,17 @@ export const columns: ColumnDef<Review>[] = [
     },
   },
   {
-    accessorKey: "serviceName",
+    accessorKey: "companyName",
     header: "Service & Vendor",
     cell: ({ row }) => {
       const r = row.original;
       return (
         <div className="flex flex-col gap-0.5">
           <span className="text-xs font-semibold text-foreground line-clamp-1">
-            {r.serviceName}
+            {r.companyName}
           </span>
           <span className="text-[10px] text-muted-foreground uppercase tracking-tight">
-            {r.vendorName} · {r.city}
+            {r.vendorName} · {r.companyType}
           </span>
         </div>
       );
@@ -201,7 +200,9 @@ export function ReviewDataTable({
 
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <span className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground flex items-center justify-center">
+              <Search className="h-4 w-4" />
+            </span>
             <Input
               placeholder="Search reviews..."
               value={(table.getColumn("review")?.getFilterValue() as string) ?? ""}
@@ -256,7 +257,7 @@ export function ReviewDataTable({
                 <TableRow
                   key={row.id}
                   className="border-border hover:bg-muted/40 transition-colors cursor-pointer"
-                  onClick={() => onSelectReview(row.original._id)}
+                  onClick={() => onSelectReview(row.original.reviewId || row.original._id || "")}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} className="py-3 px-4">

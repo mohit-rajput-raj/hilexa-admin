@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import { 
-  Mail, Phone, Hotel, MapPin, Star, CheckCircle2, 
+import {
+  Mail, Phone, Hotel, MapPin, Star, CheckCircle2,
   AlertCircle, MoreHorizontal, Clock, ShieldCheck,
   CreditCard, Hash, Receipt, User,
   Calendar
@@ -45,13 +45,13 @@ export default function BookingDetailView({ data }: { data: BookingData }) {
           <p className="text-[10px] text-muted-foreground font-mono uppercase">Internal ID: {_id}</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="h-8 text-xs">Cancel Booking</Button>
-          <Button size="sm" className="h-8 text-xs bg-primary">Download Invoice</Button>
+          {/* <Button variant="outline" size="sm" className="h-8 text-xs">Cancel Booking</Button> */}
+          {/* <Button size="sm" className="h-8 text-xs bg-primary">Download Invoice</Button> */}
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
-        
+
         {/* LEFT COLUMN: Customer & Vendor */}
         <div className="md:col-span-3 space-y-3">
           <Card className="shadow-none border-border">
@@ -72,12 +72,12 @@ export default function BookingDetailView({ data }: { data: BookingData }) {
               </div>
               <Separator />
               <div className="space-y-2">
-                 <p className="text-[10px] font-bold text-muted-foreground uppercase">Booking User Account</p>
-                 <div className="grid grid-cols-1 gap-1 text-[10px] bg-muted/50 p-2 rounded">
-                    <p className="truncate">Email: {user.email}</p>
-                    <p>Phone: {user.phoneNumber}</p>
-                    <p className="font-mono text-[9px]">UID: {user._id}</p>
-                 </div>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase">Booking User Account</p>
+                <div className="grid grid-cols-1 gap-1 text-[10px] bg-muted/50 p-2 rounded">
+                  <p className="truncate">Email: {user.email}</p>
+                  <p>Phone: {user.phoneNumber}</p>
+                  <p className="font-mono text-[9px]">UID: {user._id}</p>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -121,7 +121,7 @@ export default function BookingDetailView({ data }: { data: BookingData }) {
                 <div><p className="text-[9px] uppercase font-bold text-muted-foreground">Nights</p><p className="text-xs font-bold">{bookingInfo.nights}</p></div>
                 <div><p className="text-[9px] uppercase font-bold text-muted-foreground">Guests</p><p className="text-xs font-bold">{bookingInfo.guests.adults}A, {bookingInfo.guests.children}C</p></div>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-3">
                 <div className="border rounded-lg p-2 flex flex-col justify-center">
                   <p className="text-[9px] uppercase font-bold text-muted-foreground">Room Number</p>

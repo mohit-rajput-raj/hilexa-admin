@@ -14,3 +14,7 @@ export const getDestination = ({id , booking}:{
     const res = axiosApi.get(`/admin/users/${id}/bookings/${booking}` )
     return res
 }
+export const updateUserStatus = (userId: string, isActive: boolean) => {
+    const res = axiosApi.patch(`/admin/users/${userId}/status`, { isActive });
+    return res;
+};

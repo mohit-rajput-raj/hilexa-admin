@@ -1,6 +1,6 @@
 "use client";
-import { useQuery } from "@tanstack/react-query";
-import { adminUsers, getDestination, singleUser } from "./users.service";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { adminUsers, getDestination, singleUser, updateUserStatus } from "./users.service";
 import { usePanelRef } from "react-resizable-panels";
 
 export const useAllUsers = (params?: any) => {
@@ -47,5 +47,16 @@ export const useDestination =({
     refetchOnReconnect: true,
     retry: false, // optional
     enabled: !!id && !!booking,
+  });
+};
+
+export const useUpdateUserStatus = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, isActive }: { userId: string; isActive: boolean }) =>
+      updateUserStatus(userId, isActive),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin_users"] });
+    },
   });
 };
