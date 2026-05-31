@@ -9,7 +9,20 @@ import {
   useReactTable,
   type ColumnDef,
 } from "@tanstack/react-table";
-import { Search, MapPin, Calendar, User, MoreHorizontal, ArrowRight } from "lucide-react";
+import { 
+  Search, 
+  MapPin, 
+  Calendar, 
+  User, 
+  ChevronLeft, 
+  ChevronRight,
+  Building2,
+  Compass,
+  ShieldCheck,
+  ShieldAlert,
+  HelpCircle,
+  Eye
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,14 +35,27 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { BookingSummary } from "../page";
 import { useRouter } from "next/navigation";
 import { RouterPush } from "@/components/RouterPush";
 
 // Formatting Helpers
-const formatDate = (iso: string) => new Date(iso).toLocaleDateString("en-GB", {
-  day: "2-digit", month: "short", year: "numeric"
-});
+const formatDate = (iso: string) => {
+  if (!iso) return "N/A";
+  return new Date(iso).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric"
+  });
+};
 
 const formatCurrency = (amt: number) => 
   new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(amt);
@@ -38,90 +64,157 @@ const formatCurrency = (amt: number) =>
 export const columns: ColumnDef<BookingSummary>[] = [
   {
     accessorKey: "bookingReference",
-    header: "Ref / User",
+    header: "Reference / Guest",
     cell: ({ row }) => {
-      const router = useRouter()
+      const router = useRouter();
+      const userName = row.original.userName || "Guest";
+      const initials = userName
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2);
+
       return (
-         <div className="flex flex-col cursor-pointer" onClick={()=>{
-          RouterPush(router , `/bookings/${row.original._id}`)
-         }} >
-        <span className="font-mono text-[11px] font-bold text-primary leading-none mb-1">
-          {row.original.bookingReference}
-        </span>
-        <div className="flex items-center gap-1 text-xs text-muted-foreground font-medium uppercase tracking-tight">
-          <User className="h-3 w-3" />
-          {row.original.userName}
+        <div 
+          className="flex items-center gap-3 cursor-pointer hover:opacity-85 transition-opacity" 
+          onClick={() => RouterPush(router, `/bookings/${row.original._id}`)}
+        >
+          <Avatar className="h-9 w-9 rounded-xl border border-gray-200 dark:border-zinc-800 shrink-0">
+            <AvatarFallback className="bg-primary/5 text-primary text-xs font-bold font-mono">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col">
+            <code className="text-[10px] font-mono font-bold bg-muted px-1.5 py-0.5 rounded border text-foreground w-fit leading-none mb-1">
+              {row.original.bookingReference}
+            </code>
+            <span className="text-xs font-semibold text-foreground leading-tight">
+              {userName}
+            </span>
+          </div>
         </div>
-      </div>
-      )
+      );
     },
   },
   {
     id: "service",
-    header: "Service & City",
+    header: "Property / Location",
     accessorFn: (row) => `${row.serviceName} ${row.city}`,
-    cell: ({ row }) => (
-      <div className="flex flex-col max-w-[200px]">
-        <span className="font-bold text-sm truncate leading-tight mb-1">
-          {row.original.serviceName}
-        </span>
-        <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-          <MapPin className="h-3 w-3 shrink-0" />
-          {row.original.city}
+    cell: ({ row }) => {
+      const isStay = row.original.serviceType?.toLowerCase()?.includes("stay") || row.original.serviceType?.toLowerCase()?.includes("hotel");
+      const Icon = isStay ? Building2 : Compass;
+
+      return (
+        <div className="flex items-center gap-2.5 max-w-[240px]">
+          <div className="p-1.5 bg-muted/65 rounded-lg border border-border text-muted-foreground shrink-0">
+            <Icon size={14} />
+          </div>
+          <div className="flex flex-col min-w-0">
+            <span className="font-bold text-xs text-foreground leading-tight truncate">
+              {row.original.serviceName}
+            </span>
+            <span className="text-[10px] text-muted-foreground flex items-center gap-0.5 mt-0.5">
+              <MapPin size={10} className="shrink-0" />
+              {row.original.city}
+            </span>
+          </div>
         </div>
-      </div>
-    ),
+      );
+    },
   },
   {
     accessorKey: "checkIn",
     header: "Duration",
     cell: ({ row }) => (
-      <div className="text-[11px] leading-tight space-y-0.5">
-        <div className="flex items-center gap-1 text-muted-foreground italic">
-          {formatDate(row.original.checkIn)}
-          <ArrowRight className="h-2.5 w-2.5" />
-          {formatDate(row.original.checkOut)}
+      <div className="flex flex-col gap-0.5 text-xs">
+        <div className="flex items-center gap-1.5 text-foreground">
+          <span className="text-[9px] text-muted-foreground font-black uppercase w-7 tracking-wider">In</span>
+          <span className="font-medium">{formatDate(row.original.checkIn)}</span>
+        </div>
+        <div className="flex items-center gap-1.5 text-muted-foreground">
+          <span className="text-[9px] text-muted-foreground/60 font-black uppercase w-7 tracking-wider">Out</span>
+          <span className="font-medium">{formatDate(row.original.checkOut)}</span>
         </div>
       </div>
     ),
   },
   {
     accessorKey: "totalAmount",
-    header: "Amount",
-    cell: ({ row }) => (
-      <div className="flex flex-col">
-        <span className="font-black text-sm">{formatCurrency(row.getValue("totalAmount"))}</span>
-        <span className={`text-[9px] font-bold uppercase tracking-widest ${
-          row.original.paymentStatus === 'paid' ? 'text-emerald-500' : 'text-orange-500'
-        }`}>
-          {row.original.paymentStatus}
-        </span>
-      </div>
-    ),
-  },
-  {
-    accessorKey: "status",
-    header: "Booking Status",
+    header: "Price / Payment",
     cell: ({ row }) => {
-      const status = row.getValue("status") as string;
-      const variants: Record<string, string> = {
-        ongoing: "bg-blue-500/10 text-blue-600 border-blue-200",
-        upcoming: "bg-purple-500/10 text-purple-600 border-purple-200",
-        completed: "bg-emerald-500/10 text-emerald-600 border-emerald-200",
-        cancelled: "bg-rose-500/10 text-rose-600 border-rose-200",
+      const paymentStatus = row.original.paymentStatus || "pending";
+      const statusConfig: Record<string, { label: string; text: string; dot: string }> = {
+        paid: { label: "Paid", text: "text-emerald-700 dark:text-emerald-450 bg-emerald-500/10 border-emerald-500/20", dot: "bg-emerald-500" },
+        pending: { label: "Pending", text: "text-amber-700 dark:text-amber-450 bg-amber-500/10 border-amber-500/20", dot: "bg-amber-500" },
+        refunded: { label: "Refunded", text: "text-zinc-550 dark:text-zinc-400 bg-zinc-500/10 border-zinc-500/20", dot: "bg-zinc-500" },
       };
+      const cfg = statusConfig[paymentStatus] || statusConfig.pending;
+
       return (
-        <Badge variant="outline" className={`font-bold text-[10px] uppercase px-2 py-0.5 ${variants[status]}`}>
-          {status}
-        </Badge>
+        <div className="flex flex-col">
+          <span className="font-extrabold text-sm text-foreground font-mono">{formatCurrency(row.original.totalAmount)}</span>
+          <div className="flex items-center gap-1 mt-0.5">
+            <span className={`h-1 w-1 rounded-full ${cfg.dot}`} />
+            <Badge variant="outline" className={`font-bold text-[9px] uppercase tracking-wider px-1.5 py-0.2 rounded border-none ${cfg.text}`}>
+              {cfg.label}
+            </Badge>
+          </div>
+        </div>
       );
     },
   },
-  
+  {
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ row }) => {
+      const status = row.getValue("status") as string;
+      const statusStyles: Record<string, { dot: string; badge: string }> = {
+        ongoing: { dot: "bg-blue-500", badge: "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-200" },
+        upcoming: { dot: "bg-purple-500", badge: "bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-200" },
+        completed: { dot: "bg-emerald-500", badge: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-200" },
+        cancelled: { dot: "bg-rose-500", badge: "bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-200" },
+      };
+      const style = statusStyles[status] || { dot: "bg-amber-500", badge: "bg-amber-500/10 text-amber-700 border-amber-200" };
+
+      return (
+        <div className="flex items-center gap-2">
+          <span className={`h-1.5 w-1.5 rounded-full ${style.dot}`} />
+          <Badge variant="outline" className={`font-bold text-[9px] uppercase px-2 py-0.5 ${style.badge}`}>
+            {status}
+          </Badge>
+        </div>
+      );
+    },
+  },
+  {
+    id: "actions",
+    header: () => <span className="text-right block pr-4">Action</span>,
+    cell: ({ row }) => {
+      const router = useRouter();
+      return (
+        <div className="text-right pr-4">
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 text-[10px] font-bold border-gray-250 dark:border-zinc-800 gap-1.5 hover:bg-muted"
+            onClick={() => RouterPush(router, `/bookings/${row.original._id}`)}
+          >
+            <Eye size={12} />
+            Details
+          </Button>
+        </div>
+      );
+    },
+  },
 ];
 
 export function BookingsDataTable({ bookings }: { bookings: BookingSummary[] }) {
   const [globalFilter, setGlobalFilter] = React.useState("");
+  const [pagination, setPagination] = React.useState({
+    pageIndex: 0,
+    pageSize: 10,
+  });
 
   const table = useReactTable({
     data: bookings,
@@ -130,35 +223,68 @@ export function BookingsDataTable({ bookings }: { bookings: BookingSummary[] }) 
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onGlobalFilterChange: setGlobalFilter,
-    state: { globalFilter },
+    onPaginationChange: setPagination,
+    state: { globalFilter, pagination },
   });
 
+  const total = bookings.length;
+  const pageIndex = pagination.pageIndex;
+  const pageSize = pagination.pageSize;
+  const startIdx = total === 0 ? 0 : pageIndex * pageSize + 1;
+  const endIdx = Math.min((pageIndex + 1) * pageSize, total);
+  const totalPages = table.getPageCount() || 1;
+
   return (
-    <div className="w-full  overflow-hidden">
-      <div className="p-5 border-b border-border bg-muted/20 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="w-full rounded-xl border border-gray-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm overflow-hidden">
+      <div className="p-5 border-b border-gray-200/80 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-900/30 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-xl font-black tracking-tight uppercase italic text-primary">Booking Logs</h1>
-          <p className="text-xs text-muted-foreground font-medium">Track reservations across all property services</p>
+          <h2 className="text-lg font-bold tracking-tight text-gray-900 dark:text-zinc-50">Reservation Logs</h2>
+          <p className="text-xs text-muted-foreground font-medium">Track guest schedules, invoice details, and service logs</p>
         </div>
 
-        <div className="relative w-full sm:w-auto">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search Reference, Hotel or City..."
-            value={globalFilter ?? ""}
-            onChange={(e) => setGlobalFilter(e.target.value)}
-            className="pl-10 w-full sm:min-w-[320px] bg-background h-10 rounded-xl"
-          />
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+          <div className="relative flex-1 sm:min-w-[320px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search reference, guest, service..."
+              value={globalFilter ?? ""}
+              onChange={(e) => setGlobalFilter(e.target.value)}
+              className="pl-10 w-full bg-background h-10 rounded-lg border-gray-200 dark:border-zinc-800 dark:bg-zinc-950"
+            />
+          </div>
+          <div className="flex items-center gap-2 justify-end">
+            <span className="text-xs text-gray-500 dark:text-zinc-400 font-medium whitespace-nowrap">
+              Rows:
+            </span>
+            <Select
+              value={pageSize.toString()}
+              onValueChange={(val) => {
+                const newSize = Number(val);
+                table.setPageSize(newSize);
+                setPagination(prev => ({ ...prev, pageSize: newSize, pageIndex: 0 }));
+              }}
+            >
+              <SelectTrigger className="w-[70px] h-10 border-gray-200 dark:border-zinc-800 dark:bg-zinc-950">
+                <SelectValue placeholder="10" />
+              </SelectTrigger>
+              <SelectContent className="dark:bg-zinc-950 dark:border-zinc-800">
+                <SelectItem value="5">5</SelectItem>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="25">25</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 
       <div className="overflow-x-auto">
         <Table>
-          <TableHeader className="bg-muted/10">
+          <TableHeader className="bg-gray-50/50 dark:bg-zinc-900/10">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow key={headerGroup.id} className="border-b border-gray-200/80 dark:border-zinc-800 hover:bg-transparent">
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className="h-12 text-[11px] uppercase font-black tracking-[0.1em] text-muted-foreground/80 px-6">
+                  <TableHead key={header.id} className="h-12 text-[10px] uppercase font-bold tracking-wider text-gray-750 dark:text-zinc-400 px-6">
                     {flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
                 ))}
@@ -168,9 +294,9 @@ export function BookingsDataTable({ bookings }: { bookings: BookingSummary[] }) 
           <TableBody>
             {table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} className="hover:bg-muted/50 border-border group transition-colors">
+                <TableRow key={row.id} className="hover:bg-gray-50/50 dark:hover:bg-zinc-900/30 border-b border-gray-200/80 dark:border-zinc-800 group transition-colors">
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="py-4 px-6">
+                    <TableCell key={cell.id} className="py-3 px-6">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
@@ -187,11 +313,45 @@ export function BookingsDataTable({ bookings }: { bookings: BookingSummary[] }) 
         </Table>
       </div>
 
-      <div className="p-4 border-t border-border flex items-center justify-between">
-        <span className="text-xs text-muted-foreground">Total Bookings: {bookings.length}</span>
-        <div className="flex gap-2">
-          <Button variant="ghost" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>Prev</Button>
-          <Button variant="ghost" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>Next</Button>
+      <div className="p-4 border-t border-gray-200/80 dark:border-zinc-800 flex flex-col sm:flex-row justify-between items-center gap-3 bg-gray-50/50 dark:bg-zinc-900/30">
+        <p className="text-xs text-gray-500 dark:text-zinc-400 font-medium">
+          Showing <span className="font-semibold text-gray-900 dark:text-zinc-100">{startIdx}</span> to{" "}
+          <span className="font-semibold text-gray-900 dark:text-zinc-100">{endIdx}</span> of{" "}
+          <span className="font-semibold text-gray-900 dark:text-zinc-100">{total}</span> bookings
+        </p>
+        <div className="flex items-center gap-1.5 flex-wrap justify-center">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+            className="h-8 w-8 border-gray-200 dark:border-zinc-800"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          {[...Array(totalPages)].map((_, idx) => {
+            const pageNum = idx + 1;
+            return (
+              <Button
+                key={pageNum}
+                variant={pageIndex + 1 === pageNum ? "default" : "outline"}
+                size="sm"
+                onClick={() => table.setPageIndex(idx)}
+                className="h-8 min-w-[32px] px-2"
+              >
+                {pageNum}
+              </Button>
+            );
+          })}
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+            className="h-8 w-8 border-gray-200 dark:border-zinc-800"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
       </div>
     </div>

@@ -12,7 +12,7 @@ import {
   useReactTable,
   type ColumnDef,
 } from "@tanstack/react-table";
-import { Search, ChevronLeft, ChevronRight, Filter } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Filter, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,8 +28,50 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { User } from "../page";
-import { RouterPush } from "@/components/RouterPush";
 import { useRouter } from "next/navigation";
+import { RouterPush } from "@/components/RouterPush";
+import { useUpdateUserStatus } from "../_calls/queryies";
+import { toast } from "sonner";
+
+const UserActionsCell = ({ user }: { user: User }) => {
+  const { mutate: toggleStatus, isPending } = useUpdateUserStatus();
+
+  const handleToggle = () => {
+    toggleStatus(
+      { userId: user._id, isActive: !user.isActive },
+      {
+        onSuccess: (res: any) => {
+          toast.success(res?.data?.message || `User status updated successfully`);
+        },
+        onError: (err: any) => {
+          toast.error(err?.response?.data?.message || "Failed to update user status");
+        }
+      }
+    );
+  };
+
+  return (
+    <Button
+      variant={user.isActive ? "destructive" : "outline"}
+      size="sm"
+      className={`h-8 px-3 text-xs font-semibold transition-all ${
+        !user.isActive 
+          ? "border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/10 hover:text-emerald-700 hover:border-emerald-500" 
+          : ""
+      }`}
+      disabled={isPending}
+      onClick={handleToggle}
+    >
+      {isPending ? (
+        <Loader2 className="h-3 w-3 animate-spin mr-1" />
+      ) : user.isActive ? (
+        "Block"
+      ) : (
+        "Unblock"
+      )}
+    </Button>
+  );
+};
 
 const formatDate = (iso: string) => {
   if (!iso) return "—";
@@ -134,6 +176,11 @@ export const columns: ColumnDef<User>[] = [
         </Badge>
       );
     },
+  },
+  {
+    id: "actions",
+    header: "Actions",
+    cell: ({ row }) => <UserActionsCell user={row.original} />,
   },
 ];
 

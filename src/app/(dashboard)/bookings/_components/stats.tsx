@@ -11,91 +11,101 @@ export interface BookingStats {
 
 import React from "react";
 import { 
-   
   CalendarCheck, 
   CreditCard, 
   XCircle, 
-  TrendingUp, 
-  ArrowUpRight 
+  Sparkles,
+  DollarSign
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 export function BookingStatsGrid({ stats }: { stats: BookingStats["data"] }) {
+  if (!stats) return null;
+
   const items = [
     {
       title: "Total Bookings",
       value: stats.totalBookings,
-      description: "Lifetime reservations",
+      description: "All-time property listings logs",
       icon: CalendarCheck,
-      color: "text-blue-600",
+      color: "text-blue-500",
       bg: "bg-blue-500/10",
-      border: "border-blue-500/20",
+      border: "border-t-blue-500",
+      indicator: "Total activity active",
     },
     {
-      title: "Today's Bookings",
+      title: "Today's Reservations",
       value: stats.todaysBookings,
-      description: "New entries today",
-      icon: CalendarCheck,
-      color: "text-purple-600",
+      description: "Booked today",
+      icon: Sparkles,
+      color: "text-purple-500",
       bg: "bg-purple-500/10",
-      border: "border-purple-500/20",
+      border: "border-t-purple-500",
+      indicator: "Updated hourly",
     },
     {
       title: "Pending Payments",
       value: stats.pendingPayments,
-      description: "Awaiting confirmation",
+      description: "Awaiting gateway confirmation",
       icon: CreditCard,
-      color: "text-orange-600",
-      bg: "bg-orange-500/10",
-      border: "border-orange-500/20",
+      color: "text-amber-500",
+      bg: "bg-amber-500/10",
+      border: "border-t-amber-500",
+      indicator: "Action required",
     },
     {
       title: "Cancellations",
       value: stats.cancellations,
-      description: "Refunded/Voided",
+      description: "Cancelled or refunded",
       icon: XCircle,
-      color: "text-rose-600",
+      color: "text-rose-500",
       bg: "bg-rose-500/10",
-      border: "border-rose-500/20",
+      border: "border-t-rose-500",
+      indicator: "Review logs",
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      {items.map((item, index) => (
-        <Card key={index} className={`overflow-hidden border-b-4 ${item.border} shadow-sm group hover:shadow-md transition-all duration-300`}>
-          <CardContent className="p-5">
-            <div className="flex justify-between items-start">
-              <div className={`p-2 rounded-xl ${item.bg}`}>
-                <item.icon className={`h-5 w-5 ${item.color}`} />
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {items.map((item, index) => {
+        const Icon = item.icon;
+        return (
+          <Card 
+            key={index} 
+            className={`relative overflow-hidden border border-gray-200/80 dark:border-zinc-800 border-t-2 ${item.border} bg-white dark:bg-zinc-950 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 group`}
+          >
+            <CardContent className="p-5">
+              <div className="flex justify-between items-start">
+                <div className={`p-2 rounded-xl ${item.bg} transition-transform group-hover:scale-105 duration-300`}>
+                  <Icon className={`h-5 w-5 ${item.color}`} />
+                </div>
+                <span className="text-[9px] font-bold tracking-wider uppercase bg-muted px-2 py-0.5 rounded text-muted-foreground">
+                  {item.indicator}
+                </span>
               </div>
-              <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded-full">
-                <ArrowUpRight className="h-3 w-3" />
-                12%
-              </div>
-            </div>
 
-            <div className="mt-4 space-y-1">
-              <h3 className="text-2xl font-black tracking-tight tracking-tight">
-                {item.value.toLocaleString()}
-              </h3>
-              <div>
-                <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-                  {item.title}
-                </p>
-                <p className="text-[10px] text-muted-foreground/70 font-medium">
-                  {item.description}
-                </p>
+              <div className="mt-4 space-y-1">
+                <h3 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-zinc-50 font-mono">
+                  {item.value.toLocaleString()}
+                </h3>
+                <div className="space-y-0.5">
+                  <p className="text-xs font-bold text-gray-700 dark:text-zinc-300">
+                    {item.title}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground leading-normal">
+                    {item.description}
+                  </p>
+                </div>
               </div>
-            </div>
-            
-            {/* Subtle background decoration */}
-            <div className={`absolute -right-2 -bottom-2 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity`}>
-               <item.icon size={80} />
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+
+              {/* Decorative Background Icon */}
+              <div className="absolute right-0 bottom-0 translate-y-1/4 translate-x-1/4 opacity-[0.02] group-hover:opacity-[0.06] transition-opacity duration-300 text-foreground pointer-events-none">
+                <Icon size={120} />
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })}
     </div>
   );
 }

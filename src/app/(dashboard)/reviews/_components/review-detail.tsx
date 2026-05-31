@@ -7,7 +7,6 @@ import {
   User,
   Mail,
   Phone,
-  Calendar,
   Building2,
   MapPin,
   Trash2,
@@ -100,11 +99,18 @@ export function ReviewDetailView({ reviewId, onBack }: ReviewDetailProps) {
     );
   }
 
-  const review = detail.review;
+  const rating = detail.rating;
+  const comment = detail.comment;
+  const createdAt = detail.createdAt;
   const user = detail.user;
-  const service = detail.service;
+  const company = detail.company;
   const vendor = detail.vendor;
   const vendorReply = detail.vendorReply;
+  const moderation = detail.moderation || {};
+
+  const userFullName = user
+    ? `${user.firstName || ""} ${user.lastName || ""}`.trim()
+    : "Unnamed User";
 
   return (
     <div className="space-y-4">
@@ -117,7 +123,7 @@ export function ReviewDetailView({ reviewId, onBack }: ReviewDetailProps) {
 
         <div className="flex items-center gap-2">
           {/* Flag review */}
-          {detail.isFlagged ? (
+          {moderation.isFlagged ? (
             <Button
               variant="outline"
               size="sm"
@@ -198,28 +204,28 @@ export function ReviewDetailView({ reviewId, onBack }: ReviewDetailProps) {
               <div>
                 <h3 className="font-semibold text-foreground">Review Content</h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Submitted {formatDateTime(review?.createdAt)}
+                  Submitted {formatDateTime(createdAt)}
                 </p>
               </div>
               <div className="flex items-center gap-1 bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20">
                 <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
-                <span className="text-sm font-bold text-amber-600">{review?.rating} / 5</span>
+                <span className="text-sm font-bold text-amber-600">{rating} / 5</span>
               </div>
             </div>
             <CardContent className="p-5 space-y-4">
               <div>
                 <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-2">Comment</p>
                 <p className="text-base text-foreground italic leading-relaxed">
-                  "{review?.comment}"
+                  "{comment || "No comment left."}"
                 </p>
               </div>
 
-              {detail.flagReason && (
+              {moderation.isFlagged && moderation.flagReason && (
                 <div className="bg-rose-500/5 border border-rose-500/20 rounded-xl p-3 flex items-start gap-2.5">
                   <AlertOctagon className="h-4 w-4 text-rose-500 mt-0.5 shrink-0" />
                   <div>
                     <h5 className="text-xs font-bold text-rose-700">Admin Flag Reason</h5>
-                    <p className="text-xs text-rose-600/90 mt-0.5">{detail.flagReason}</p>
+                    <p className="text-xs text-rose-600/90 mt-0.5">{moderation.flagReason}</p>
                   </div>
                 </div>
               )}
@@ -267,7 +273,7 @@ export function ReviewDetailView({ reviewId, onBack }: ReviewDetailProps) {
                   <User className="h-4 w-4 text-muted-foreground" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium">{user?.name || "Unnamed User"}</p>
+                  <p className="text-sm font-medium">{userFullName}</p>
                   <p className="text-[10px] text-muted-foreground">Customer</p>
                 </div>
               </div>
@@ -292,18 +298,14 @@ export function ReviewDetailView({ reviewId, onBack }: ReviewDetailProps) {
             </div>
             <CardContent className="p-4 space-y-3">
               <Badge variant="outline" className="capitalize font-medium bg-blue-500/10 text-blue-600 border-blue-500/20">
-                {service?.type || "Hotel"}
+                {company?.type || "Service"}
               </Badge>
-              {service?.hotel && (
+              {company && (
                 <div className="space-y-2">
-                  <p className="text-sm font-medium text-foreground">{service.hotel.name}</p>
+                  <p className="text-sm font-medium text-foreground">{company.name}</p>
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <MapPin className="h-3.5 w-3.5 shrink-0" />
-                    <span className="line-clamp-2">{service.hotel.city} {service.hotel.address && `· ${service.hotel.address}`}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500 shrink-0" />
-                    <span>{service.hotel.rating || 0} rating ({service.hotel.numReviews || 0} reviews)</span>
+                    <span className="line-clamp-2">ID: {company.id}</span>
                   </div>
                 </div>
               )}
@@ -323,9 +325,6 @@ export function ReviewDetailView({ reviewId, onBack }: ReviewDetailProps) {
                   </div>
                   <div>
                     <p className="text-sm font-medium">{vendor.businessName}</p>
-                    <Badge variant="outline" className="text-[9px] uppercase tracking-wider mt-1">
-                      {vendor.status}
-                    </Badge>
                   </div>
                 </div>
                 <Separator />
@@ -340,12 +339,6 @@ export function ReviewDetailView({ reviewId, onBack }: ReviewDetailProps) {
                     <div className="flex items-center gap-3 text-sm font-mono">
                       <Phone className="h-3.5 w-3.5 text-muted-foreground/70" />
                       <span className="text-muted-foreground text-xs">{vendor.businessPhone}</span>
-                    </div>
-                  )}
-                  {vendor.city && (
-                    <div className="flex items-center gap-3 text-sm">
-                      <MapPin className="h-3.5 w-3.5 text-muted-foreground/70" />
-                      <span className="text-muted-foreground text-xs">{vendor.city}</span>
                     </div>
                   )}
                 </div>

@@ -11,7 +11,7 @@ import {
   useReactTable,
   type ColumnDef,
 } from "@tanstack/react-table";
-import { Search, MapPin, Building2, Star, Calendar } from "lucide-react";
+import { Search, MapPin, Building2, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +24,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Property } from "../page";
 import { RouterPush } from "@/components/RouterPush";
 import { useRouter } from "next/navigation";
@@ -44,22 +51,28 @@ export const columns: ColumnDef<Property>[] = [
     id: "property",
     header: "Property Name",
     accessorFn: (row) => `${row.propertyName} ${row.city}`,
-    cell: ({ row }) => (
-      <div className="flex items-center gap-3">
-        <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-          <Building2 className="h-5 w-5 text-primary" />
-        </div>
-        <div className="flex flex-col">
-          <span className="font-bold text-sm leading-none mb-1">
-            {row.original.propertyName}
-          </span>
-          <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-            <MapPin className="h-3 w-3" />
-            {row.original.city}
+    cell: ({ row }) => {
+      const router = useRouter();
+      return (
+        <div 
+          className="flex items-center gap-3 cursor-pointer hover:opacity-85 transition-opacity"
+          onClick={() => RouterPush(router, `/properties/${row.original._id}`)}
+        >
+          <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+            <Building2 className="h-5 w-5 text-primary" />
+          </div>
+          <div className="flex flex-col">
+            <span className="font-bold text-sm leading-none mb-1 text-foreground">
+              {row.original.propertyName}
+            </span>
+            <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+              <MapPin className="h-3 w-3" />
+              {row.original.city}
+            </div>
           </div>
         </div>
-      </div>
-    ),
+      );
+    },
   },
   {
     accessorKey: "submittedAt",
@@ -109,15 +122,17 @@ export const columns: ColumnDef<Property>[] = [
   },
   {
     id: "actions",
-    header: "Manage",
+    header: () => <span className="text-right block pr-2">Manage</span>,
     cell: ({ row }) => {
       const router = useRouter();
       return (
-        <Button variant="ghost" size="sm" className="h-8 text-[11px] font-bold" onClick={() => {
-          RouterPush(router, `/properties/${row.original._id}`)
-        }}>
-          View Details
-        </Button>
+        <div className="text-right pr-2">
+          <Button variant="ghost" size="sm" className="h-8 text-[11px] font-bold" onClick={() => {
+            RouterPush(router, `/properties/${row.original._id}`)
+          }}>
+            View Details
+          </Button>
+        </div>
       )
     },
   },
@@ -125,46 +140,83 @@ export const columns: ColumnDef<Property>[] = [
 
 export function PropertiesDataTable({ properties }: { properties: Property[] }) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+  const [pagination, setPagination] = React.useState({
+    pageIndex: 0,
+    pageSize: 10,
+  });
 
   const table = useReactTable({
     data: properties,
     columns,
     onColumnFiltersChange: setColumnFilters,
+    onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    state: { columnFilters },
+    state: { columnFilters, pagination },
   });
 
+  const total = properties.length;
+  const pageIndex = pagination.pageIndex;
+  const pageSize = pagination.pageSize;
+  const startIdx = total === 0 ? 0 : pageIndex * pageSize + 1;
+  const endIdx = Math.min((pageIndex + 1) * pageSize, total);
+  const totalPages = table.getPageCount() || 1;
+
   return (
-    <div className="w-full  overflow-hidden">
+    <div className="w-full rounded-xl border border-gray-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm overflow-hidden animate-in fade-in duration-300">
       {/* Search Header */}
-      <div className="p-4 bg-muted/20 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="p-5 border-b border-gray-200/80 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-900/30 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-lg font-bold tracking-tight">Property Directory</h2>
-          <p className="text-xs text-muted-foreground">Manage and rank your registered property listings</p>
+          <h2 className="text-lg font-bold tracking-tight text-gray-900 dark:text-zinc-50">Property Directory</h2>
+          <p className="text-xs text-muted-foreground font-medium">Manage and rank your registered property listings</p>
         </div>
 
-        <div className="relative">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search property or city..."
-            value={(table.getColumn("property")?.getFilterValue() as string) ?? ""}
-            onChange={(e) => table.getColumn("property")?.setFilterValue(e.target.value)}
-            className="pl-9 w-full sm:w-[300px] bg-background border-input h-9"
-          />
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+          <div className="relative flex-1 sm:min-w-[320px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search property or city..."
+              value={(table.getColumn("property")?.getFilterValue() as string) ?? ""}
+              onChange={(e) => table.getColumn("property")?.setFilterValue(e.target.value)}
+              className="pl-10 w-full bg-background h-10 rounded-lg border-gray-200 dark:border-zinc-800 dark:bg-zinc-950"
+            />
+          </div>
+          <div className="flex items-center gap-2 justify-end">
+            <span className="text-xs text-gray-500 dark:text-zinc-400 font-medium whitespace-nowrap">
+              Rows:
+            </span>
+            <Select
+              value={pageSize.toString()}
+              onValueChange={(val) => {
+                const newSize = Number(val);
+                table.setPageSize(newSize);
+                setPagination(prev => ({ ...prev, pageSize: newSize, pageIndex: 0 }));
+              }}
+            >
+              <SelectTrigger className="w-[70px] h-10 border-gray-200 dark:border-zinc-800 dark:bg-zinc-950">
+                <SelectValue placeholder="10" />
+              </SelectTrigger>
+              <SelectContent className="dark:bg-zinc-950 dark:border-zinc-800">
+                <SelectItem value="5">5</SelectItem>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="25">25</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 
       {/* Table Body */}
       <div className="overflow-x-auto">
         <Table>
-          <TableHeader className="bg-muted/30">
+          <TableHeader className="bg-gray-50/50 dark:bg-zinc-900/10">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow key={headerGroup.id} className="border-b border-gray-200/80 dark:border-zinc-800 hover:bg-transparent">
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className="h-10 text-[10px] uppercase font-black text-muted-foreground tracking-widest">
+                  <TableHead key={header.id} className="h-12 text-[10px] uppercase font-bold tracking-wider text-gray-750 dark:text-zinc-400 px-6">
                     {flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
                 ))}
@@ -174,9 +226,9 @@ export function PropertiesDataTable({ properties }: { properties: Property[] }) 
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} className="hover:bg-muted/40 transition-colors border-border">
+                <TableRow key={row.id} className="hover:bg-gray-50/50 dark:hover:bg-zinc-900/30 border-b border-gray-200/80 dark:border-zinc-800 group transition-colors">
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="py-3 px-4">
+                    <TableCell key={cell.id} className="py-4 px-6">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
@@ -184,7 +236,7 @@ export function PropertiesDataTable({ properties }: { properties: Property[] }) 
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-32 text-center text-muted-foreground text-sm italic">
+                <TableCell colSpan={columns.length} className="h-40 text-center text-muted-foreground italic">
                   No properties found.
                 </TableCell>
               </TableRow>
@@ -194,11 +246,45 @@ export function PropertiesDataTable({ properties }: { properties: Property[] }) 
       </div>
 
       {/* Footer info */}
-      <div className="p-4 border-t border-border bg-muted/10 flex items-center justify-between text-[11px] font-medium text-muted-foreground">
-        <div>Showing {table.getRowModel().rows.length} properties</div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="h-7 px-2" disabled={!table.getCanPreviousPage()} onClick={() => table.previousPage()}>Prev</Button>
-          <Button variant="outline" size="sm" className="h-7 px-2" disabled={!table.getCanNextPage()} onClick={() => table.nextPage()}>Next</Button>
+      <div className="p-4 border-t border-gray-200/80 dark:border-zinc-800 flex flex-col sm:flex-row justify-between items-center gap-3 bg-gray-50/50 dark:bg-zinc-900/30">
+        <p className="text-xs text-gray-500 dark:text-zinc-400 font-medium">
+          Showing <span className="font-semibold text-gray-900 dark:text-zinc-100">{startIdx}</span> to{" "}
+          <span className="font-semibold text-gray-900 dark:text-zinc-100">{endIdx}</span> of{" "}
+          <span className="font-semibold text-gray-900 dark:text-zinc-100">{total}</span> properties
+        </p>
+        <div className="flex items-center gap-1.5 flex-wrap justify-center">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+            className="h-8 w-8 border-gray-200 dark:border-zinc-800"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          {[...Array(totalPages)].map((_, idx) => {
+            const pageNum = idx + 1;
+            return (
+              <Button
+                key={pageNum}
+                variant={pageIndex + 1 === pageNum ? "default" : "outline"}
+                size="sm"
+                onClick={() => table.setPageIndex(idx)}
+                className="h-8 min-w-[32px] px-2"
+              >
+                {pageNum}
+              </Button>
+            );
+          })}
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+            className="h-8 w-8 border-gray-200 dark:border-zinc-800"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
       </div>
     </div>
